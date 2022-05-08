@@ -26,6 +26,12 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import {MotiView} from 'moti';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,6 +66,21 @@ const App: () => Node = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const scale = useSharedValue(1);
+  const animatedStyles = useAnimatedStyle(() => {
+    return {transform: [{scale: scale.value}]};
+  });
+
+  React.useEffect(() => {
+    scale.value = withSequence(
+      withTiming(1),
+      withTiming(1.5),
+      withTiming(1),
+      withTiming(1.5),
+      withTiming(1),
+    );
+  }, []);
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -77,9 +98,11 @@ const App: () => Node = () => {
               screen and then come back to see your edits.
             </Section>
           </MotiView>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
+          <Animated.View style={animatedStyles}>
+            <Section title="See Your Changes">
+              <ReloadInstructions />
+            </Section>
+          </Animated.View>
           <Section title="Debug">
             <DebugInstructions />
           </Section>
